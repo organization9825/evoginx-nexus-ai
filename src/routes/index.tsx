@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import controlRoom from "@/assets/control-room.jpg";
 
@@ -124,7 +125,7 @@ function Hero() {
       <div className="blueprint-grid absolute inset-0" aria-hidden="true" />
       <div className="relative mx-auto max-w-6xl px-6 pb-16 pt-20">
         <div className="rise-in font-mono text-[11px] uppercase tracking-[0.25em] text-ink-foreground/50">
-          Cross-domain AI · Engineering · India
+          Cross-domain AI · Engineering · Nepal
         </div>
         <h1
           className="rise-in mt-6 font-display text-[clamp(3rem,8vw,6.5rem)] font-extrabold leading-[0.95] tracking-tight [animation-delay:80ms]"
@@ -279,7 +280,69 @@ function Partners() {
   );
 }
 
+const INTEREST_OPTIONS = [
+  "AI software (law / medical / education / industry)",
+  "AI hardware integration",
+  "Import / export of AI hardware",
+  "Partnership or multi-vendor collaboration",
+  "Other",
+];
+
 function Contact() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    organization: "",
+    interest: INTEREST_OPTIONS[0],
+    message: "",
+  });
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+
+  function update(field: keyof typeof form) {
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+      setForm((f) => ({ ...f, [field]: e.target.value }));
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+
+    const name = form.name.trim();
+    const email = form.email.trim();
+    if (!name || !email) {
+      setError("Please fill in your name and email so we can reply.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    const subject = `Enquiry — ${name}${form.organization.trim() ? ` (${form.organization.trim()})` : ""}`;
+    const body = [
+      `Name: ${name}`,
+      `Email: ${email}`,
+      form.phone.trim() ? `Phone: ${form.phone.trim()}` : null,
+      form.organization.trim() ? `Organization: ${form.organization.trim()}` : null,
+      `Interest: ${form.interest}`,
+      "",
+      "Message:",
+      form.message.trim() || "(no message)",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    window.location.href = `mailto:contact@evoginx.com?subject=${encodeURIComponent(
+      subject,
+    )}&body=${encodeURIComponent(body)}`;
+    setSent(true);
+  }
+
+  const fieldClass =
+    "w-full rounded-[3px] border border-ink-foreground/20 bg-ink-foreground/[0.04] px-3 py-2.5 text-sm text-ink-foreground placeholder:text-ink-foreground/35 outline-none transition focus:border-accent focus:bg-ink-foreground/[0.07]";
+
   return (
     <section id="contact" className="bg-ink text-ink-foreground">
       <div className="mx-auto grid max-w-6xl gap-12 px-6 py-20 md:grid-cols-2">
@@ -291,35 +354,222 @@ function Contact() {
             Start a conversation.
           </h2>
           <p className="mt-4 max-w-[42ch] leading-relaxed text-pretty text-ink-foreground/70">
-            For partnerships, procurement, or a scoped engagement, reach the engineering team
+            Tell us a little about your project and the engineering team will get back to you
             directly.
           </p>
-        </div>
-        <div className="flex flex-col justify-center">
           <a
             href="mailto:contact@evoginx.com"
-            className="font-display text-2xl font-bold tracking-tight text-balance transition-colors hover:text-accent md:text-3xl"
+            className="mt-8 inline-block font-display text-xl font-bold tracking-tight text-balance transition-colors hover:text-accent md:text-2xl"
           >
             contact@evoginx.com
           </a>
           <div className="mt-6 font-mono text-[11px] uppercase tracking-[0.15em] text-ink-foreground/40">
-            Evognix A.I. Pvt Ltd · India
+            Evognix A.I. Pvt Ltd · Registered in Nepal
           </div>
         </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-[4px] border border-ink-foreground/15 bg-ink-foreground/[0.03] p-6 md:p-8"
+          noValidate
+        >
+          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-foreground/50">
+            Enquiry form
+          </div>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <label className="block sm:col-span-1">
+              <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.12em] text-ink-foreground/50">
+                Name *
+              </span>
+              <input
+                type="text"
+                value={form.name}
+                onChange={update("name")}
+                placeholder="Your full name"
+                maxLength={100}
+                className={fieldClass}
+              />
+            </label>
+            <label className="block sm:col-span-1">
+              <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.12em] text-ink-foreground/50">
+                Email *
+              </span>
+              <input
+                type="email"
+                value={form.email}
+                onChange={update("email")}
+                placeholder="you@company.com"
+                maxLength={255}
+                className={fieldClass}
+              />
+            </label>
+            <label className="block sm:col-span-1">
+              <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.12em] text-ink-foreground/50">
+                Phone
+              </span>
+              <input
+                type="tel"
+                value={form.phone}
+                onChange={update("phone")}
+                placeholder="Optional"
+                maxLength={30}
+                className={fieldClass}
+              />
+            </label>
+            <label className="block sm:col-span-1">
+              <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.12em] text-ink-foreground/50">
+                Organization
+              </span>
+              <input
+                type="text"
+                value={form.organization}
+                onChange={update("organization")}
+                placeholder="Company or institution"
+                maxLength={120}
+                className={fieldClass}
+              />
+            </label>
+            <label className="block sm:col-span-2">
+              <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.12em] text-ink-foreground/50">
+                I'm interested in
+              </span>
+              <select value={form.interest} onChange={update("interest")} className={fieldClass}>
+                {INTEREST_OPTIONS.map((option) => (
+                  <option key={option} value={option} className="text-foreground">
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block sm:col-span-2">
+              <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.12em] text-ink-foreground/50">
+                Message
+              </span>
+              <textarea
+                value={form.message}
+                onChange={update("message")}
+                placeholder="A short note about your project, timeline, or requirements"
+                rows={4}
+                maxLength={1000}
+                className={`${fieldClass} resize-y`}
+              />
+            </label>
+          </div>
+
+          {error ? (
+            <p className="mt-4 rounded-[3px] border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive-foreground">
+              {error}
+            </p>
+          ) : null}
+
+          <button
+            type="submit"
+            className="mt-6 w-full rounded-[3px] bg-accent px-6 py-3 font-mono text-[12px] uppercase tracking-[0.1em] text-accent-foreground transition hover:brightness-110"
+          >
+            Send enquiry
+          </button>
+          {sent ? (
+            <p className="mt-3 text-center text-xs text-ink-foreground/50">
+              Your email client should open with the enquiry ready to send to contact@evoginx.com.
+            </p>
+          ) : (
+            <p className="mt-3 text-center text-xs text-ink-foreground/35">
+              Details go straight to contact@evoginx.com.
+            </p>
+          )}
+        </form>
       </div>
     </section>
   );
 }
 
 function Footer() {
+  const year = new Date().getFullYear();
   return (
     <footer className="border-t border-ink-foreground/15 bg-ink text-ink-foreground">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 sm:flex-row">
-        <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-ink-foreground/40">
-          © 2026 Evognix A.I. Pvt Ltd
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
+          <div>
+            <a href="#top" className="flex items-center gap-3">
+              <div className="grid size-9 place-items-center rounded-[3px] bg-ink-foreground/10 font-mono text-sm font-medium text-ink-foreground outline outline-1 outline-ink-foreground/20">
+                E
+              </div>
+              <div className="leading-tight">
+                <div className="font-display text-[15px] font-bold tracking-tight">
+                  EVOGNIX A.I.
+                </div>
+                <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-ink-foreground/40">
+                  Pvt Ltd · Engineering
+                </div>
+              </div>
+            </a>
+            <p className="mt-5 max-w-[36ch] text-sm leading-relaxed text-ink-foreground/55">
+              Cross-domain AI systems — software, hardware, and the multi-vendor partnerships
+              that bind them. Built to be reliable and scalable.
+            </p>
+          </div>
+
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-foreground/40">
+              Company
+            </div>
+            <ul className="mt-4 space-y-2.5 text-sm text-ink-foreground/70">
+              {NAV_LINKS.map((link) => (
+                <li key={link.href}>
+                  <a
+                    href={link.href}
+                    className="transition-colors hover:text-ink-foreground"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-foreground/40">
+              Capabilities
+            </div>
+            <ul className="mt-4 space-y-2.5 text-sm text-ink-foreground/70">
+              <li>Domain AI software</li>
+              <li>AI hardware integration</li>
+              <li>Import &amp; export of AI hardware</li>
+              <li>Multi-vendor collaboration</li>
+            </ul>
+          </div>
+
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-foreground/40">
+              Contact
+            </div>
+            <ul className="mt-4 space-y-2.5 text-sm text-ink-foreground/70">
+              <li>
+                <a
+                  href="mailto:contact@evoginx.com"
+                  className="transition-colors hover:text-ink-foreground"
+                >
+                  contact@evoginx.com
+                </a>
+              </li>
+              <li className="text-ink-foreground/55">Registered in Nepal</li>
+            </ul>
+            <a
+              href="#contact"
+              className="mt-5 inline-block rounded-[3px] border border-ink-foreground/25 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.12em] text-ink-foreground transition hover:border-accent hover:text-accent"
+            >
+              Send an enquiry
+            </a>
+          </div>
         </div>
-        <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-ink-foreground/40">
-          Reliable · Scalable · Cross-domain
+
+        <div className="flex flex-col items-center justify-between gap-2 border-t border-ink-foreground/10 py-6 sm:flex-row">
+          <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-ink-foreground/40">
+            © {year} Evognix A.I. Pvt Ltd. All rights reserved.
+          </div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-ink-foreground/40">
+            Reliable · Scalable · Cross-domain
+          </div>
         </div>
       </div>
     </footer>
